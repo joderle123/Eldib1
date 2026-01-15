@@ -4399,6 +4399,51 @@ function exportPEI() {
     html += '&copy; deutsche Ausgabe: Institut fur Entwicklungstherapie/Entwicklungspadagogik e.V. (ETEP Europe)';
     html += '</div>';
 
+    // Altersvergleich direkt unter dem ELDiB-Raster
+    html += '<div style="margin-top: 20px;">';
+    html += '<h4 style="font-size: 10pt; margin-bottom: 10px; color: #333;">Comparaison: Age biologique vs. Age de developpement socio-emotionnel</h4>';
+    html += '<div class="age-bars">';
+
+    // Biologisches Alter
+    var bioYearsGrid = biologicalAge ? biologicalAge.decimal : 0;
+    var maxAgeGrid = 16;
+    html += '<div class="age-bar-row">';
+    html += '<span class="age-bar-label">Age biologique:</span>';
+    html += '<span class="age-bar-container"><span class="age-bar bio" style="width:' + Math.min((bioYearsGrid/maxAgeGrid)*100, 100) + '%;"></span></span>';
+    html += '<span class="age-value">' + (biologicalAge ? bioYearsGrid.toFixed(1) + ' ans' : '-') + '</span>';
+    html += '</div>';
+
+    // Verhalten
+    html += '<div class="age-bar-row">';
+    html += '<span class="age-bar-label">Comportement (V):</span>';
+    html += '<span class="age-bar-container"><span class="age-bar verhalten" style="width:' + (devAges.verhalten ? Math.min((devAges.verhalten/maxAgeGrid)*100, 100) : 0) + '%;"></span></span>';
+    html += '<span class="age-value">' + (devAges.verhalten ? devAges.verhalten.toFixed(1) + ' ans' : '-') + '</span>';
+    html += '</div>';
+
+    // Kommunikation
+    html += '<div class="age-bar-row">';
+    html += '<span class="age-bar-label">Communication (KOMM):</span>';
+    html += '<span class="age-bar-container"><span class="age-bar kommunikation" style="width:' + (devAges.kommunikation ? Math.min((devAges.kommunikation/maxAgeGrid)*100, 100) : 0) + '%;"></span></span>';
+    html += '<span class="age-value">' + (devAges.kommunikation ? devAges.kommunikation.toFixed(1) + ' ans' : '-') + '</span>';
+    html += '</div>';
+
+    // Sozialisation
+    html += '<div class="age-bar-row">';
+    html += '<span class="age-bar-label">Socialisation (SOZ):</span>';
+    html += '<span class="age-bar-container"><span class="age-bar sozialisation" style="width:' + (devAges.sozialisation ? Math.min((devAges.sozialisation/maxAgeGrid)*100, 100) : 0) + '%;"></span></span>';
+    html += '<span class="age-value">' + (devAges.sozialisation ? devAges.sozialisation.toFixed(1) + ' ans' : '-') + '</span>';
+    html += '</div>';
+
+    // Kognition
+    html += '<div class="age-bar-row">';
+    html += '<span class="age-bar-label">Cognition (KOG):</span>';
+    html += '<span class="age-bar-container"><span class="age-bar kognition" style="width:' + (devAges.kognition ? Math.min((devAges.kognition/maxAgeGrid)*100, 100) : 0) + '%;"></span></span>';
+    html += '<span class="age-value">' + (devAges.kognition ? devAges.kognition.toFixed(1) + ' ans' : '-') + '</span>';
+    html += '</div>';
+
+    html += '</div>'; // Ende age-bars
+    html += '</div>'; // Ende container
+
     // Page break
     html += '<div class="page-break"></div>';
 
