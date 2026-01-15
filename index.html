@@ -1080,6 +1080,10 @@
                 <input type="text" id="foerderort" placeholder="z.B. CDSE">
             </div>
             <div>
+                <label>Klasse</label>
+                <input type="text" id="klasse" placeholder="z.B. 3a">
+            </div>
+            <div>
                 <label>Datum der Einschätzung</label>
                 <input type="date" id="assessmentDate">
             </div>
@@ -1284,6 +1288,7 @@ function loadProfile(profileId) {
     document.getElementById('studentName').value = profile.studentData.name || '';
     document.getElementById('birthDate').value = profile.studentData.birthDate || '';
     document.getElementById('foerderort').value = profile.studentData.foerderort || '';
+    document.getElementById('klasse').value = profile.studentData.klasse || '';
 
     document.getElementById('deleteProfileBtn').style.display = 'inline-block';
 
@@ -1418,6 +1423,7 @@ function saveCurrentEvaluation() {
     profile.studentData.name = document.getElementById('studentName').value;
     profile.studentData.birthDate = document.getElementById('birthDate').value;
     profile.studentData.foerderort = document.getElementById('foerderort').value;
+    profile.studentData.klasse = document.getElementById('klasse').value;
 
     // Evaluation aktualisieren
     evaluation.date = document.getElementById('assessmentDate').value;
@@ -1451,6 +1457,7 @@ function manualSave() {
                 name: studentName,
                 birthDate: document.getElementById('birthDate').value || '',
                 foerderort: document.getElementById('foerderort').value || '',
+                klasse: document.getElementById('klasse').value || '',
                 assessorName: document.getElementById('assessorName').value || ''
             },
             evaluations: []
@@ -2650,6 +2657,7 @@ function loadFromLocalStorage() {
                 document.getElementById('studentName').value = data.student.name || '';
                 document.getElementById('birthDate').value = data.student.birthDate || '';
                 document.getElementById('foerderort').value = data.student.foerderort || '';
+                document.getElementById('klasse').value = data.student.klasse || '';
                 document.getElementById('assessmentDate').value = data.student.assessmentDate || '';
                 document.getElementById('assessorName').value = data.student.assessorName || '';
             }
@@ -2664,6 +2672,7 @@ function getStudentData() {
         name: document.getElementById('studentName').value,
         birthDate: document.getElementById('birthDate').value,
         foerderort: document.getElementById('foerderort').value,
+        klasse: document.getElementById('klasse')?.value || '',
         assessmentDate: document.getElementById('assessmentDate').value,
         assessorName: document.getElementById('assessorName').value
     };
@@ -4361,7 +4370,7 @@ function exportPEI() {
     html += '<tr><td>Date de naissance</td><td>' + (student.birthDate ? new Date(student.birthDate).toLocaleDateString('de-DE') : '') + '</td></tr>';
     html += '<tr><td>Age</td><td>' + (biologicalAge ? biologicalAge.years + ' ans, ' + biologicalAge.months + ' mois' : '') + '</td></tr>';
     html += '<tr><td>Ecole/Institution</td><td>' + (student.foerderort || '') + '</td></tr>';
-    html += '<tr><td>Classe</td><td>' + (student.klpiKlasse || '') + '</td></tr>';
+    html += '<tr><td>Classe</td><td>' + (student.klasse || '') + '</td></tr>';
     html += '<tr><td>Date evaluation</td><td>' + (student.assessmentDate ? new Date(student.assessmentDate).toLocaleDateString('de-DE') : today) + '</td></tr>';
     html += '<tr><td>Evaluateur</td><td>' + (student.assessorName || '') + '</td></tr>';
     html += '</table>';
