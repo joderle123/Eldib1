@@ -3336,7 +3336,7 @@ L-2165 Luxembourg
 
 <table class="info-table">
 <tr><td>Name des/der Schüler.in</td><td>${student.name || ''}</td></tr>
-<tr><td>Sozialversicherungsnummer</td><td>${student.birthDate ? new Date(student.birthDate).toLocaleDateString('de-DE').replace(/\\./g, ' ').split(' ').reverse().join(' ') : ''}</td></tr>
+<tr><td>Sozialversicherungsnummer</td><td>${student.birthDate ? new Date(student.birthDate).toLocaleDateString('de-DE').replace(/\./g, ' ').split(' ').reverse().join(' ') : ''}</td></tr>
 <tr><td>Alter</td><td>${biologicalAge ? biologicalAge.years + ' Jahre, ' + biologicalAge.months + ' Monate' : ''}</td></tr>
 <tr><td>Schule</td><td>${student.foerderort || ''}</td></tr>
 <tr><td>Klasse</td><td></td></tr>
@@ -3437,7 +3437,7 @@ L-2165 Luxembourg
 <p class="placeholder-text">(objektiv, konkrete, relevante Verhaltensweisen beschreiben / sowohl die negativen als auch die positiven)</p>
 
 <p class="heading2">4.2 Ergebnisse der Testverfahren</p>
-\${generate42Section(student, devAges)}
+` + generate42Section(student, devAges) + `
 
 <p class="heading2">4.3 Interpretation</p>
 <p class="placeholder-text">(von allen Informationen, Testergebnissen und Beobachtungen, Überschneidungen/Differenzen – wie kann man diese interpretieren? / ELDiB-Welche Abwehrmechanismen sind, wie genau, bei dem/der Schüler:in zu beobachten, die die jeweiligen Entwicklungsängste kompensieren?)</p>
@@ -3531,11 +3531,11 @@ ${generateAgeBarHTML('Kognition (KOG)', devAges.kognition || 0, 'kognition', 17)
 </html>`;
 
     // Download als .doc
-    var blob = new Blob(['\\ufeff' + html], { type: 'application/msword' });
+    var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
     var url = URL.createObjectURL(blob);
     var link = document.createElement('a');
     link.href = url;
-    link.download = 'DS_' + (student.name || 'Spezialisierte_Diagnostik').replace(/\\s+/g, '_') + '_' + today.replace(/\\./g, '-') + '.doc';
+    link.download = 'DS_' + (student.name || 'Spezialisierte_Diagnostik').replace(/\s+/g, '_') + '_' + today.replace(/\./g, '-') + '.doc';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -3756,7 +3756,7 @@ function generateAgeBarHTML(label, age, cssClass, maxAge) {
         '</div>';
 }
 
-// Hilfsfunktion fuer DS Grid HTML - Breites Format für DIN A4
+// Hilfsfunktion fuer DS Grid HTML - Kompaktes Format für DIN A4
 function generateDSGridHTML(gridData) {
     var statusLookup = {};
     Object.keys(gridData).forEach(function(domain) {
@@ -3766,78 +3766,91 @@ function generateDSGridHTML(gridData) {
         });
     });
 
-    // Stufengrenzen nach Template
-    var stufeRanges = {
-        5: { start: 57, end: 62, label: 'Stufe 5: 13-17 Jahre', richtziel: 'Individuelle/gruppenbezogene Fähigkeiten in neuen Situationen anwenden' },
-        4: { start: 50, end: 56, label: 'Stufe 4: 10-12 Jahre', richtziel: 'Sich in Gruppenprozesse einbringen' },
-        3: { start: 37, end: 49, label: 'Stufe 3: 6-9 Jahre', richtziel: 'Fähigkeiten zur erfolgreichen Gruppenteilnahme erwerben' },
-        2: { start: 20, end: 36, label: 'Stufe 2: 3-5 Jahre', richtziel: 'Auf die Umwelt mit Erfolg reagieren' },
-        1: { start: 1, end: 19, label: 'Stufe 1: 0-2 Jahre', richtziel: 'Auf die Umwelt mit Freude reagieren' }
-    };
-
-    // Breite Tabelle für A4 Querformat-ähnliche Darstellung
-    var html = '<table style="width:100%; border-collapse:collapse; font-size:8pt; margin:10pt 0;">';
+    // Kompakte Tabelle - 5 Spalten nebeneinander pro Zeile für jede Stufe
+    var html = '<table style="width:100%; border-collapse:collapse; font-size:7pt; margin:8pt 0;">';
 
     // Header
-    html += '<tr style="background:#4472C4; color:white; font-weight:bold; text-align:center;">';
-    html += '<td style="border:1px solid #000; padding:4pt; width:8%;">V</td>';
-    html += '<td style="border:1px solid #000; padding:4pt; width:8%;">KOMM</td>';
-    html += '<td style="border:1px solid #000; padding:4pt; width:8%;">SOZ</td>';
-    html += '<td style="border:1px solid #000; padding:4pt; width:8%;">KOG</td>';
-    html += '<td style="border:1px solid #000; padding:4pt; width:68%; text-align:left; background:#D9E2F3; color:#000;">Stufe / Richtziel</td>';
+    html += '<tr>';
+    html += '<td style="border:1px solid #000; background:#4472C4; color:white; font-weight:bold; text-align:center; padding:3pt; width:6%;">V</td>';
+    html += '<td style="border:1px solid #000; background:#4472C4; color:white; font-weight:bold; text-align:center; padding:3pt; width:6%;">KOMM</td>';
+    html += '<td style="border:1px solid #000; background:#4472C4; color:white; font-weight:bold; text-align:center; padding:3pt; width:6%;">SOZ</td>';
+    html += '<td style="border:1px solid #000; background:#4472C4; color:white; font-weight:bold; text-align:center; padding:3pt; width:6%;">KOG</td>';
+    html += '<td style="border:1px solid #000; background:#D9E2F3; font-weight:bold; text-align:left; padding:3pt;">Stufe</td>';
     html += '</tr>';
 
-    // Zeilen von oben nach unten (62 -> 1)
-    for (var row = 62; row >= 1; row--) {
-        html += '<tr>';
+    // Stufendefinitionen mit Item-Bereichen
+    var stufen = [
+        { nr: 5, label: 'Stufe 5: 13-17 J.', v: [29,33], k: [30,35], s: [35,41], kog: [57,62] },
+        { nr: 4, label: 'Stufe 4: 10-12 J.', v: [23,28], k: [23,29], s: [28,34], kog: [50,56] },
+        { nr: 3, label: 'Stufe 3: 6-9 J.', v: [15,22], k: [14,22], s: [18,27], kog: [37,49] },
+        { nr: 2, label: 'Stufe 2: 3-5 J.', v: [8,14], k: [7,13], s: [9,17], kog: [20,36] },
+        { nr: 1, label: 'Stufe 1: 0-2 J.', v: [1,7], k: [1,6], s: [1,8], kog: [1,19] }
+    ];
 
-        // V (Verhalten) - max 33 Items
-        if (row <= 33) {
-            var vStatus = statusLookup.verhalten ? (statusLookup.verhalten[row] || 'nicht-erreicht') : 'nicht-erreicht';
-            var vBg = vStatus === 'erreicht' ? '#70AD47' : (vStatus === 'ziel' ? '#FFC000' : '#FFFFFF');
-            var vColor = vStatus === 'erreicht' ? '#FFFFFF' : '#000000';
-            html += '<td style="border:1px solid #000; text-align:center; padding:2pt; background:' + vBg + '; color:' + vColor + ';">' + row + '</td>';
-        } else {
-            html += '<td style="border:1px solid #000; background:#E7E6E6;"></td>';
+    stufen.forEach(function(stufe) {
+        // Mehrere Zeilen pro Stufe - komprimiert
+        var maxRows = Math.max(
+            stufe.v[1] - stufe.v[0] + 1,
+            stufe.k[1] - stufe.k[0] + 1,
+            stufe.s[1] - stufe.s[0] + 1,
+            stufe.kog[1] - stufe.kog[0] + 1
+        );
+
+        for (var i = 0; i < maxRows; i++) {
+            html += '<tr style="height:12pt;">';
+
+            // V
+            var vNum = stufe.v[1] - i;
+            if (vNum >= stufe.v[0]) {
+                var vStatus = statusLookup.verhalten ? (statusLookup.verhalten[vNum] || '') : '';
+                var vBg = vStatus === 'erreicht' ? '#70AD47' : (vStatus === 'ziel' ? '#FFC000' : '#fff');
+                var vCol = vStatus === 'erreicht' ? '#fff' : '#000';
+                html += '<td style="border:1px solid #000; text-align:center; background:' + vBg + '; color:' + vCol + ';">' + vNum + '</td>';
+            } else {
+                html += '<td style="border:1px solid #000; background:#E7E6E6;"></td>';
+            }
+
+            // KOMM
+            var kNum = stufe.k[1] - i;
+            if (kNum >= stufe.k[0]) {
+                var kStatus = statusLookup.kommunikation ? (statusLookup.kommunikation[kNum] || '') : '';
+                var kBg = kStatus === 'erreicht' ? '#70AD47' : (kStatus === 'ziel' ? '#FFC000' : '#fff');
+                var kCol = kStatus === 'erreicht' ? '#fff' : '#000';
+                html += '<td style="border:1px solid #000; text-align:center; background:' + kBg + '; color:' + kCol + ';">' + kNum + '</td>';
+            } else {
+                html += '<td style="border:1px solid #000; background:#E7E6E6;"></td>';
+            }
+
+            // SOZ
+            var sNum = stufe.s[1] - i;
+            if (sNum >= stufe.s[0]) {
+                var sStatus = statusLookup.sozialisation ? (statusLookup.sozialisation[sNum] || '') : '';
+                var sBg = sStatus === 'erreicht' ? '#70AD47' : (sStatus === 'ziel' ? '#FFC000' : '#fff');
+                var sCol = sStatus === 'erreicht' ? '#fff' : '#000';
+                html += '<td style="border:1px solid #000; text-align:center; background:' + sBg + '; color:' + sCol + ';">' + sNum + '</td>';
+            } else {
+                html += '<td style="border:1px solid #000; background:#E7E6E6;"></td>';
+            }
+
+            // KOG
+            var kogNum = stufe.kog[1] - i;
+            if (kogNum >= stufe.kog[0]) {
+                var kogStatus = statusLookup.kognition ? (statusLookup.kognition[kogNum] || '') : '';
+                var kogBg = kogStatus === 'erreicht' ? '#70AD47' : (kogStatus === 'ziel' ? '#FFC000' : '#fff');
+                var kogCol = kogStatus === 'erreicht' ? '#fff' : '#000';
+                html += '<td style="border:1px solid #000; text-align:center; background:' + kogBg + '; color:' + kogCol + ';">' + kogNum + '</td>';
+            } else {
+                html += '<td style="border:1px solid #000; background:#E7E6E6;"></td>';
+            }
+
+            // Stufe Label nur in erster Zeile
+            if (i === 0) {
+                html += '<td style="border:1px solid #000; background:#D9E2F3; font-weight:bold; padding:2pt 4pt;" rowspan="' + maxRows + '">' + stufe.label + '</td>';
+            }
+
+            html += '</tr>';
         }
-
-        // KOMM (Kommunikation) - max 35 Items
-        if (row <= 35) {
-            var kStatus = statusLookup.kommunikation ? (statusLookup.kommunikation[row] || 'nicht-erreicht') : 'nicht-erreicht';
-            var kBg = kStatus === 'erreicht' ? '#70AD47' : (kStatus === 'ziel' ? '#FFC000' : '#FFFFFF');
-            var kColor = kStatus === 'erreicht' ? '#FFFFFF' : '#000000';
-            html += '<td style="border:1px solid #000; text-align:center; padding:2pt; background:' + kBg + '; color:' + kColor + ';">' + row + '</td>';
-        } else {
-            html += '<td style="border:1px solid #000; background:#E7E6E6;"></td>';
-        }
-
-        // SOZ (Sozialisation) - max 41 Items
-        if (row <= 41) {
-            var sStatus = statusLookup.sozialisation ? (statusLookup.sozialisation[row] || 'nicht-erreicht') : 'nicht-erreicht';
-            var sBg = sStatus === 'erreicht' ? '#70AD47' : (sStatus === 'ziel' ? '#FFC000' : '#FFFFFF');
-            var sColor = sStatus === 'erreicht' ? '#FFFFFF' : '#000000';
-            html += '<td style="border:1px solid #000; text-align:center; padding:2pt; background:' + sBg + '; color:' + sColor + ';">' + row + '</td>';
-        } else {
-            html += '<td style="border:1px solid #000; background:#E7E6E6;"></td>';
-        }
-
-        // KOG (Kognition) - max 62 Items
-        var kogStatus = statusLookup.kognition ? (statusLookup.kognition[row] || 'nicht-erreicht') : 'nicht-erreicht';
-        var kogBg = kogStatus === 'erreicht' ? '#70AD47' : (kogStatus === 'ziel' ? '#FFC000' : '#FFFFFF');
-        var kogColor = kogStatus === 'erreicht' ? '#FFFFFF' : '#000000';
-        html += '<td style="border:1px solid #000; text-align:center; padding:2pt; background:' + kogBg + '; color:' + kogColor + ';">' + row + '</td>';
-
-        // Stufe Label - nur bei bestimmten Zeilen
-        var stufeLabel = '';
-        if (row === 62) stufeLabel = '<strong>' + stufeRanges[5].label + '</strong><br><span style="font-size:7pt;">' + stufeRanges[5].richtziel + '</span>';
-        else if (row === 56) stufeLabel = '<strong>' + stufeRanges[4].label + '</strong><br><span style="font-size:7pt;">' + stufeRanges[4].richtziel + '</span>';
-        else if (row === 49) stufeLabel = '<strong>' + stufeRanges[3].label + '</strong><br><span style="font-size:7pt;">' + stufeRanges[3].richtziel + '</span>';
-        else if (row === 36) stufeLabel = '<strong>' + stufeRanges[2].label + '</strong><br><span style="font-size:7pt;">' + stufeRanges[2].richtziel + '</span>';
-        else if (row === 19) stufeLabel = '<strong>' + stufeRanges[1].label + '</strong><br><span style="font-size:7pt;">' + stufeRanges[1].richtziel + '</span>';
-
-        html += '<td style="border:1px solid #000; padding:2pt 6pt; background:#D9E2F3; font-size:7pt; vertical-align:middle;">' + stufeLabel + '</td>';
-        html += '</tr>';
-    }
+    });
 
     html += '</table>';
     return html;
