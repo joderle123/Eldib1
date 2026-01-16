@@ -3437,23 +3437,7 @@ L-2165 Luxembourg
 <p class="placeholder-text">(objektiv, konkrete, relevante Verhaltensweisen beschreiben / sowohl die negativen als auch die positiven)</p>
 
 <p class="heading2">4.2 Ergebnisse der Testverfahren</p>
-<p><strong>ELDiB (Entwicklungstherapeutischer/Entwicklungspädagogischer Lernziel-Diagnose-Bogen):</strong> Der ELDiB ist ein standardisiertes, Einschätzungsinstrument, das dazu dient, die soziale und emotionale Entwicklung von Kindern und Jugendlichen im Alter zwischen Geburt und sechzehn Jahren zu erfassen. Er stellt ein Profil von spezifischen Fähigkeiten zur Verfügung, die als Indikatoren der sozialen und emotionalen Förderung dienen.</p>
-
-<p><strong>Entwicklungsalter nach Bereichen:</strong></p>
-<ul style="margin: 6pt 0 12pt 24pt;">
-<li>Verhalten (V): ${devAges.verhalten ? devAges.verhalten.toFixed(1) + ' Jahre (Stufe ' + getStageForAge(devAges.verhalten) + ')' : 'nicht ermittelt'}</li>
-<li>Kommunikation (K): ${devAges.kommunikation ? devAges.kommunikation.toFixed(1) + ' Jahre (Stufe ' + getStageForAge(devAges.kommunikation) + ')' : 'nicht ermittelt'}</li>
-<li>Sozialisation (SOZ): ${devAges.sozialisation ? devAges.sozialisation.toFixed(1) + ' Jahre (Stufe ' + getStageForAge(devAges.sozialisation) + ')' : 'nicht ermittelt'}</li>
-<li>Kognition (KOG): ${devAges.kognition ? devAges.kognition.toFixed(1) + ' Jahre (Stufe ' + getStageForAge(devAges.kognition) + ')' : 'nicht ermittelt'}</li>
-</ul>
-
-<p>Der am weitesten entwickelte Bereich bei <span class="placeholder-text">(Name des/der Schülers/Schülerin)</span>, ist der des/der <span class="placeholder-text">(Verhalten (V) / Kommunikation (K) / Schulische Kompetenzen/Kognition (KOG) / Sozialisation (SOZ))</span>, hier befindet sich der/die Schüler:in auf Entwicklungsstufe <span class="placeholder-text">…</span> . Er/Sie zeigt bereits gute <span class="placeholder-text">...</span> . Dies wird beispielsweise deutlich durch <span class="placeholder-text">...</span> . Allerdings gelingt es ihm/ihr noch nicht immer, <span class="placeholder-text">... (anhand von 1-2 Beispielen darstellen)</span>.</p>
-
-<p>Ausgehend vom Richtziel, <span class="placeholder-text">(siehe ELDiB Booklet)</span>, ergaben sich folgende Lernziele für ihn/sie:</p>
-<ul style="margin: 6pt 0 12pt 24pt;">
-<li>V/K/KOG/SOZ <span class="placeholder-text">… – … (siehe ELDiB Booklet)</span></li>
-<li>V/K/KOG/SOZ <span class="placeholder-text">… – …</span></li>
-</ul>
+\${generate42Section(student, devAges)}
 
 <p class="heading2">4.3 Interpretation</p>
 <p class="placeholder-text">(von allen Informationen, Testergebnissen und Beobachtungen, Überschneidungen/Differenzen – wie kann man diese interpretieren? / ELDiB-Welche Abwehrmechanismen sind, wie genau, bei dem/der Schüler:in zu beobachten, die die jeweiligen Entwicklungsängste kompensieren?)</p>
@@ -3560,11 +3544,205 @@ ${generateAgeBarHTML('Kognition (KOG)', devAges.kognition || 0, 'kognition', 17)
 
 // Hilfsfunktion: Stufe aus Alter ermitteln
 function getStageForAge(age) {
-    if (age <= 2) return 'I';
-    if (age <= 5) return 'II';
-    if (age <= 9) return 'III';
-    if (age <= 12) return 'IV';
-    return 'V';
+    if (age <= 2) return 1;
+    if (age <= 5) return 2;
+    if (age <= 9) return 3;
+    if (age <= 12) return 4;
+    return 5;
+}
+
+// Hilfsfunktion: Stufe als römische Zahl
+function getStageRoman(stage) {
+    var romans = {1: 'I', 2: 'II', 3: 'III', 4: 'IV', 5: 'V'};
+    return romans[stage] || stage;
+}
+
+// Hilfsfunktion: Stufenbeschreibung
+function getStageDescription(stage) {
+    var descriptions = {
+        1: '0-2 Jahre',
+        2: '3-5 Jahre',
+        3: '6-9 Jahre',
+        4: '10-12 Jahre',
+        5: '13-17 Jahre'
+    };
+    return descriptions[stage] || '';
+}
+
+// Hilfsfunktion: Richtziel für Stufe
+function getStageRichtziel(stage) {
+    var richtziele = {
+        1: 'Auf die Umwelt mit Freude reagieren',
+        2: 'Auf die Umwelt mit Erfolg reagieren',
+        3: 'Fähigkeiten zur erfolgreichen Gruppenteilnahme erwerben',
+        4: 'Sich in Gruppenprozesse einbringen',
+        5: 'Individuelle/gruppenbezogene Fähigkeiten in neuen Situationen anwenden'
+    };
+    return richtziele[stage] || '';
+}
+
+// Hilfsfunktion: Bereichsname
+function getDomainName(domain) {
+    var names = {
+        verhalten: 'Verhalten (V)',
+        kommunikation: 'Kommunikation (K)',
+        sozialisation: 'Sozialisation (SOZ)',
+        kognition: 'Kognition (KOG)'
+    };
+    return names[domain] || domain;
+}
+
+// Hilfsfunktion: Bereichscode
+function getDomainCode(domain) {
+    var codes = {
+        verhalten: 'V',
+        kommunikation: 'K',
+        sozialisation: 'SOZ',
+        kognition: 'KOG'
+    };
+    return codes[domain] || domain;
+}
+
+// Hilfsfunktion: Sortierte Bereiche nach Entwicklungsalter
+function getSortedDomainsByAge(devAges) {
+    var domains = ['verhalten', 'kommunikation', 'sozialisation', 'kognition'];
+    return domains
+        .filter(function(d) { return devAges[d] && devAges[d] > 0; })
+        .sort(function(a, b) { return (devAges[b] || 0) - (devAges[a] || 0); });
+}
+
+// Hilfsfunktion: Ziele für einen Bereich sammeln
+function getGoalsForDomain(domain) {
+    var goals = [];
+    if (!ELDIB_DATA[domain]) return goals;
+    ELDIB_DATA[domain].stufen.forEach(function(stufe) {
+        stufe.items.forEach(function(item) {
+            var status = assessments[domain][item.id];
+            if (status && status.ziel) {
+                goals.push({
+                    id: item.id,
+                    nummer: item.id.split('-')[1],
+                    text: item.text,
+                    stufe: stufe.nummer
+                });
+            }
+        });
+    });
+    return goals;
+}
+
+// Hilfsfunktion: Erreichte Items für einen Bereich
+function getReachedItemsForDomain(domain) {
+    var reached = [];
+    if (!ELDIB_DATA[domain]) return reached;
+    ELDIB_DATA[domain].stufen.forEach(function(stufe) {
+        stufe.items.forEach(function(item) {
+            var status = assessments[domain][item.id];
+            if (status && status.erreicht) {
+                reached.push({
+                    id: item.id,
+                    nummer: item.id.split('-')[1],
+                    text: item.text,
+                    stufe: stufe.nummer
+                });
+            }
+        });
+    });
+    return reached;
+}
+
+// Generiert den 4.2 Abschnitt automatisch aus ELDiB-Daten
+function generate42Section(student, devAges) {
+    var sortedDomains = getSortedDomainsByAge(devAges);
+    if (sortedDomains.length === 0) {
+        return '<p class="placeholder-text">(Keine ELDiB-Daten vorhanden)</p>';
+    }
+
+    var html = '';
+    var studentName = student.name || '(Name des/der Schülers/Schülerin)';
+
+    // ELDiB Einleitung
+    html += '<p><strong>ELDiB (Entwicklungstherapeutischer/Entwicklungspädagogischer Lernziel-Diagnose-Bogen):</strong> ';
+    html += 'Der ELDiB ist ein standardisiertes Einschätzungsinstrument, das dazu dient, die soziale und emotionale ';
+    html += 'Entwicklung von Kindern und Jugendlichen im Alter zwischen Geburt und sechzehn Jahren zu erfassen. ';
+    html += 'Er stellt ein Profil von spezifischen Fähigkeiten zur Verfügung, die als Indikatoren der sozialen und emotionalen Förderung dienen.</p>';
+
+    // Höchster Bereich
+    var highestDomain = sortedDomains[0];
+    var highestAge = devAges[highestDomain];
+    var highestStage = getStageForAge(highestAge);
+    var highestGoals = getGoalsForDomain(highestDomain);
+
+    html += '<p><strong>Der am weitesten entwickelte Bereich</strong> bei ' + studentName + ', ist der ';
+    html += '<strong>' + getDomainName(highestDomain) + '</strong>, hier befindet sich der/die Schüler:in auf ';
+    html += '<strong>Entwicklungsstufe ' + getStageRoman(highestStage) + ' (' + getStageDescription(highestStage) + ')</strong> ';
+    html += 'mit einem Entwicklungsalter von <strong>' + highestAge.toFixed(1) + ' Jahren</strong>. ';
+    html += '<span class="placeholder-text">Er/Sie zeigt bereits gute ... . Dies wird beispielsweise deutlich durch ... . ';
+    html += 'Allerdings gelingt es ihm/ihr noch nicht immer, ... (anhand von 1-2 Beispielen darstellen).</span></p>';
+
+    html += '<p>Ausgehend vom Richtziel <em>„' + getStageRichtziel(highestStage) + '"</em> (siehe ELDiB Booklet), ergaben sich folgende Lernziele:</p>';
+    if (highestGoals.length > 0) {
+        html += '<ul style="margin: 6pt 0 12pt 24pt;">';
+        highestGoals.slice(0, 3).forEach(function(goal) {
+            html += '<li>' + getDomainCode(highestDomain) + ' ' + goal.nummer + ' – ' + goal.text + '</li>';
+        });
+        html += '</ul>';
+    } else {
+        html += '<ul style="margin: 6pt 0 12pt 24pt;"><li>' + getDomainCode(highestDomain) + ' <span class="placeholder-text">… – … (siehe ELDiB Booklet)</span></li></ul>';
+    }
+
+    // Mittlere Bereiche
+    for (var i = 1; i < sortedDomains.length - 1; i++) {
+        var domain = sortedDomains[i];
+        var age = devAges[domain];
+        var stage = getStageForAge(age);
+        var goals = getGoalsForDomain(domain);
+
+        html += '<p><strong>Im Bereich ' + getDomainName(domain) + '</strong> befindet sich der/die Schüler:in auf der ';
+        html += '<strong>Entwicklungsstufe ' + getStageRoman(stage) + ' (' + getStageDescription(stage) + ')</strong> ';
+        html += 'mit einem Entwicklungsalter von <strong>' + age.toFixed(1) + ' Jahren</strong>. ';
+        html += '<span class="placeholder-text">Er/Sie zeigt bereits gute ... . Dies wird beispielsweise deutlich durch ... . ';
+        html += 'Allerdings gelingt es ihm/ihr noch nicht immer, ... (anhand von 1-2 Beispielen darstellen).</span></p>';
+
+        html += '<p>Ausgehend vom Richtziel <em>„' + getStageRichtziel(stage) + '"</em> (siehe ELDiB Booklet), ergaben sich folgende Lernziele:</p>';
+        if (goals.length > 0) {
+            html += '<ul style="margin: 6pt 0 12pt 24pt;">';
+            goals.slice(0, 3).forEach(function(goal) {
+                html += '<li>' + getDomainCode(domain) + ' ' + goal.nummer + ' – ' + goal.text + '</li>';
+            });
+            html += '</ul>';
+        } else {
+            html += '<ul style="margin: 6pt 0 12pt 24pt;"><li>' + getDomainCode(domain) + ' <span class="placeholder-text">… – … (siehe ELDiB Booklet)</span></li></ul>';
+        }
+    }
+
+    // Niedrigster Bereich (falls mehr als ein Bereich)
+    if (sortedDomains.length > 1) {
+        var lowestDomain = sortedDomains[sortedDomains.length - 1];
+        var lowestAge = devAges[lowestDomain];
+        var lowestStage = getStageForAge(lowestAge);
+        var lowestGoals = getGoalsForDomain(lowestDomain);
+
+        html += '<p><strong>Der am niedrigsten entwickelte Bereich</strong> bei ' + studentName + ', ist der ';
+        html += '<strong>' + getDomainName(lowestDomain) + '</strong>, hier befindet sich der/die Schüler:in auf der ';
+        html += '<strong>Entwicklungsstufe ' + getStageRoman(lowestStage) + ' (' + getStageDescription(lowestStage) + ')</strong> ';
+        html += 'mit einem Entwicklungsalter von <strong>' + lowestAge.toFixed(1) + ' Jahren</strong>. ';
+        html += '<span class="placeholder-text">Er/Sie zeigt bereits gute ... . Dies wird beispielsweise deutlich durch ... . ';
+        html += 'Allerdings gelingt es ihm/ihr noch nicht immer, ... (anhand von 1-2 Beispielen darstellen).</span></p>';
+
+        html += '<p>Ausgehend vom Richtziel <em>„' + getStageRichtziel(lowestStage) + '"</em> (siehe ELDiB Booklet), ergaben sich folgende Lernziele:</p>';
+        if (lowestGoals.length > 0) {
+            html += '<ul style="margin: 6pt 0 12pt 24pt;">';
+            lowestGoals.slice(0, 3).forEach(function(goal) {
+                html += '<li>' + getDomainCode(lowestDomain) + ' ' + goal.nummer + ' – ' + goal.text + '</li>';
+            });
+            html += '</ul>';
+        } else {
+            html += '<ul style="margin: 6pt 0 12pt 24pt;"><li>' + getDomainCode(lowestDomain) + ' <span class="placeholder-text">… – … (siehe ELDiB Booklet)</span></li></ul>';
+        }
+    }
+
+    return html;
 }
 
 // Hilfsfunktion: Altersbalken HTML generieren
@@ -3578,7 +3756,7 @@ function generateAgeBarHTML(label, age, cssClass, maxAge) {
         '</div>';
 }
 
-// Hilfsfunktion fuer DS Grid HTML
+// Hilfsfunktion fuer DS Grid HTML - Breites Format für DIN A4
 function generateDSGridHTML(gridData) {
     var statusLookup = {};
     Object.keys(gridData).forEach(function(domain) {
@@ -3588,66 +3766,76 @@ function generateDSGridHTML(gridData) {
         });
     });
 
-    var html = '<table class="eldib-grid">';
-    html += '<tr>';
-    html += '<td class="header-cell">V</td>';
-    html += '<td class="header-cell">KOMM</td>';
-    html += '<td class="header-cell">SOZ</td>';
-    html += '<td class="header-cell">KOG</td>';
-    html += '<td class="stufe-cell">Stufe</td>';
-    html += '</tr>';
-
-    // Stufen-Grenzen: Stufe 5 (57-62), Stufe 4 (50-56), Stufe 3 (37-49), Stufe 2 (20-36), Stufe 1 (1-19)
-    var stufeLabels = {
-        62: 'Stufe 5: 13-17 Jahre',
-        56: 'Stufe 4: 10-12 Jahre',
-        49: 'Stufe 3: 6-9 Jahre',
-        36: 'Stufe 2: 2-5 Jahre',
-        19: 'Stufe 1: 0-2 Jahre'
+    // Stufengrenzen nach Template
+    var stufeRanges = {
+        5: { start: 57, end: 62, label: 'Stufe 5: 13-17 Jahre', richtziel: 'Individuelle/gruppenbezogene Fähigkeiten in neuen Situationen anwenden' },
+        4: { start: 50, end: 56, label: 'Stufe 4: 10-12 Jahre', richtziel: 'Sich in Gruppenprozesse einbringen' },
+        3: { start: 37, end: 49, label: 'Stufe 3: 6-9 Jahre', richtziel: 'Fähigkeiten zur erfolgreichen Gruppenteilnahme erwerben' },
+        2: { start: 20, end: 36, label: 'Stufe 2: 3-5 Jahre', richtziel: 'Auf die Umwelt mit Erfolg reagieren' },
+        1: { start: 1, end: 19, label: 'Stufe 1: 0-2 Jahre', richtziel: 'Auf die Umwelt mit Freude reagieren' }
     };
 
+    // Breite Tabelle für A4 Querformat-ähnliche Darstellung
+    var html = '<table style="width:100%; border-collapse:collapse; font-size:8pt; margin:10pt 0;">';
+
+    // Header
+    html += '<tr style="background:#4472C4; color:white; font-weight:bold; text-align:center;">';
+    html += '<td style="border:1px solid #000; padding:4pt; width:8%;">V</td>';
+    html += '<td style="border:1px solid #000; padding:4pt; width:8%;">KOMM</td>';
+    html += '<td style="border:1px solid #000; padding:4pt; width:8%;">SOZ</td>';
+    html += '<td style="border:1px solid #000; padding:4pt; width:8%;">KOG</td>';
+    html += '<td style="border:1px solid #000; padding:4pt; width:68%; text-align:left; background:#D9E2F3; color:#000;">Stufe / Richtziel</td>';
+    html += '</tr>';
+
+    // Zeilen von oben nach unten (62 -> 1)
     for (var row = 62; row >= 1; row--) {
         html += '<tr>';
 
-        // V (Verhalten) - max 33
+        // V (Verhalten) - max 33 Items
         if (row <= 33) {
-            var vStatus = statusLookup.verhalten[row] || 'nicht-erreicht';
-            var vClass = vStatus === 'erreicht' ? 'erreicht' : (vStatus === 'ziel' ? 'ziel' : '');
-            html += '<td class="' + vClass + '">' + row + '</td>';
+            var vStatus = statusLookup.verhalten ? (statusLookup.verhalten[row] || 'nicht-erreicht') : 'nicht-erreicht';
+            var vBg = vStatus === 'erreicht' ? '#70AD47' : (vStatus === 'ziel' ? '#FFC000' : '#FFFFFF');
+            var vColor = vStatus === 'erreicht' ? '#FFFFFF' : '#000000';
+            html += '<td style="border:1px solid #000; text-align:center; padding:2pt; background:' + vBg + '; color:' + vColor + ';">' + row + '</td>';
         } else {
-            html += '<td class="empty-cell"></td>';
+            html += '<td style="border:1px solid #000; background:#E7E6E6;"></td>';
         }
 
-        // KOMM (Kommunikation) - max 35
+        // KOMM (Kommunikation) - max 35 Items
         if (row <= 35) {
-            var kStatus = statusLookup.kommunikation[row] || 'nicht-erreicht';
-            var kClass = kStatus === 'erreicht' ? 'erreicht' : (kStatus === 'ziel' ? 'ziel' : '');
-            html += '<td class="' + kClass + '">' + row + '</td>';
+            var kStatus = statusLookup.kommunikation ? (statusLookup.kommunikation[row] || 'nicht-erreicht') : 'nicht-erreicht';
+            var kBg = kStatus === 'erreicht' ? '#70AD47' : (kStatus === 'ziel' ? '#FFC000' : '#FFFFFF');
+            var kColor = kStatus === 'erreicht' ? '#FFFFFF' : '#000000';
+            html += '<td style="border:1px solid #000; text-align:center; padding:2pt; background:' + kBg + '; color:' + kColor + ';">' + row + '</td>';
         } else {
-            html += '<td class="empty-cell"></td>';
+            html += '<td style="border:1px solid #000; background:#E7E6E6;"></td>';
         }
 
-        // SOZ (Sozialisation) - max 41
+        // SOZ (Sozialisation) - max 41 Items
         if (row <= 41) {
-            var sStatus = statusLookup.sozialisation[row] || 'nicht-erreicht';
-            var sClass = sStatus === 'erreicht' ? 'erreicht' : (sStatus === 'ziel' ? 'ziel' : '');
-            html += '<td class="' + sClass + '">' + row + '</td>';
+            var sStatus = statusLookup.sozialisation ? (statusLookup.sozialisation[row] || 'nicht-erreicht') : 'nicht-erreicht';
+            var sBg = sStatus === 'erreicht' ? '#70AD47' : (sStatus === 'ziel' ? '#FFC000' : '#FFFFFF');
+            var sColor = sStatus === 'erreicht' ? '#FFFFFF' : '#000000';
+            html += '<td style="border:1px solid #000; text-align:center; padding:2pt; background:' + sBg + '; color:' + sColor + ';">' + row + '</td>';
         } else {
-            html += '<td class="empty-cell"></td>';
+            html += '<td style="border:1px solid #000; background:#E7E6E6;"></td>';
         }
 
-        // KOG (Kognition) - max 62
-        var kogStatus = statusLookup.kognition[row] || 'nicht-erreicht';
-        var kogClass = kogStatus === 'erreicht' ? 'erreicht' : (kogStatus === 'ziel' ? 'ziel' : '');
-        html += '<td class="' + kogClass + '">' + row + '</td>';
+        // KOG (Kognition) - max 62 Items
+        var kogStatus = statusLookup.kognition ? (statusLookup.kognition[row] || 'nicht-erreicht') : 'nicht-erreicht';
+        var kogBg = kogStatus === 'erreicht' ? '#70AD47' : (kogStatus === 'ziel' ? '#FFC000' : '#FFFFFF');
+        var kogColor = kogStatus === 'erreicht' ? '#FFFFFF' : '#000000';
+        html += '<td style="border:1px solid #000; text-align:center; padding:2pt; background:' + kogBg + '; color:' + kogColor + ';">' + row + '</td>';
 
-        // Stufe Label
-        if (stufeLabels[row]) {
-            html += '<td class="stufe-cell">' + stufeLabels[row] + '</td>';
-        } else {
-            html += '<td class="stufe-cell"></td>';
-        }
+        // Stufe Label - nur bei bestimmten Zeilen
+        var stufeLabel = '';
+        if (row === 62) stufeLabel = '<strong>' + stufeRanges[5].label + '</strong><br><span style="font-size:7pt;">' + stufeRanges[5].richtziel + '</span>';
+        else if (row === 56) stufeLabel = '<strong>' + stufeRanges[4].label + '</strong><br><span style="font-size:7pt;">' + stufeRanges[4].richtziel + '</span>';
+        else if (row === 49) stufeLabel = '<strong>' + stufeRanges[3].label + '</strong><br><span style="font-size:7pt;">' + stufeRanges[3].richtziel + '</span>';
+        else if (row === 36) stufeLabel = '<strong>' + stufeRanges[2].label + '</strong><br><span style="font-size:7pt;">' + stufeRanges[2].richtziel + '</span>';
+        else if (row === 19) stufeLabel = '<strong>' + stufeRanges[1].label + '</strong><br><span style="font-size:7pt;">' + stufeRanges[1].richtziel + '</span>';
 
+        html += '<td style="border:1px solid #000; padding:2pt 6pt; background:#D9E2F3; font-size:7pt; vertical-align:middle;">' + stufeLabel + '</td>';
         html += '</tr>';
     }
 
